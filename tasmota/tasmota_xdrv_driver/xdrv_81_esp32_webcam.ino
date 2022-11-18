@@ -111,6 +111,8 @@
 #include "fb_gfx.h"
 #include "camera_pins.h"
 
+#include "motion.h"
+
 bool HttpCheckPriviledgedAccess(bool);
 extern ESP8266WebServer *Webserver;
 
@@ -584,7 +586,13 @@ uint32_t WcSetMotionDetect(int32_t value) {
 // optional motion detector
 void WcDetectMotion(void) {
   camera_fb_t *wc_fb;
-  uint8_t *out_buf = 0;
+  uint8_t *out_buf = 0;/*
+  static uint8 *img_prev;
+  static MotionEstContext me_ctx = {  
+                  .method = BLOCK_MATCHING_EPZS,  
+                  .width = (int)wc_fb->width, .height = (int)wc_fb->height,
+                  .mbSize = 8, 
+                  .search_param = 5 };*/
 
   if ((millis()-wc_motion.motion_ltime) > wc_motion.motion_detect) {
     wc_motion.motion_ltime = millis();
@@ -605,6 +613,23 @@ void WcDetectMotion(void) {
           // convert to bw
           uint64_t accu = 0;
           uint64_t bright = 0;
+/*
+          MotionEstContext *p_me_ctx = &me_ctx;
+          p_me_ctx->method = BLOCK_MATCHING_EPZS;
+          p_me_ctx->width = (int)wc_fb->width; //need change in size_t in submodule
+          p_me_ctx->height = (int)wc_fb->height; //need change in size_t in submodule
+          p_me_ctx->mbSize = 8;
+          p_me_ctx->search_param = 5;
+
+          AddLog(LOG_LEVEL_INFO, PSTR("before init context"));
+          init_context(p_me_ctx);
+          AddLog(LOG_LEVEL_INFO, PSTR("after init context"));
+          if(!motion_estimation(p_me_ctx, (uint8_t *)img_prev, (uint8_t *)out_buf))
+            AddLog(LOG_LEVEL_DEBUG, PSTR("motion estimtion failed!"));
+          
+          AddLog(LOG_LEVEL_INFO, PSTR("after motion"));
+          img_prev = &out_buf[0];
+*/
           for (y = 0; y < wc_fb->height; y++) {
             for (x = 0; x < wc_fb->width; x++) {
               int32_t gray = (pxi[0] + pxi[1] + pxi[2]) / 3;
@@ -619,6 +644,12 @@ void WcDetectMotion(void) {
           wc_motion.motion_trigger = accu / ((wc_fb->height * wc_fb->width) / 100);
           wc_motion.motion_brightness = bright / ((wc_fb->height * wc_fb->width) / 100);
           free(out_buf);
+
+
+          /*wc_motion.motion_trigger = (me_ctx.sum.vx ^ 2 + me_ctx.sum.vy ^ 2) / me_ctx.b_count;
+          wc_motion.motion_brightness = 1;
+          uninit(&me_ctx);
+          free(out_buf);*/
         }
       }
     }
