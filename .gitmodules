@@ -1,0 +1,3 @@
+[submodule "esp32-motion"]
+	path = C:/Users/mrtom/Tasmota-12.2.0/lib/libesp32/esp32-motion
+	url = git@github.com:thomas-pegot/esp32-motion.git
