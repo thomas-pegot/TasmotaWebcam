@@ -5,16 +5,17 @@
   "description": "ESP32 camera header files",
   "repository": {
     "type": "git",
-    "url": "https://github.com/espressif/esp32-camera"
+    "url": "https://github.com/thomas-pegot/esp32-camera"
   },
   "frameworks": "arduino",
   "platforms": "espressif32",
   "build": {
     "flags": [
-      "-Idriver/include"
+      "-Idriver/include",
+      "-Iconversions/include"
     ],
     "includeDir": ".",
     "srcDir": ".",
-    "srcFilter": ["-<*>", "+<driver>"]
+    "srcFilter": ["-<*>", "+<driver>", "+<conversions>"]
   }
 }
